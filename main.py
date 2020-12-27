@@ -46,10 +46,35 @@ def getAccuracy(testSet, prediction):
     
     return (1.0 * correct) / len(testSet)
 
+def loadDataset(filename, split, trSet, teSet):
+    with open('my.dat', 'rb') as f:
+        while True:
+            try:
+                dataset.append(pickle.load(f))
+            except EOFError:
+                f.close()
+                break
+    for x in range(len(dataset)):
+        if random.random() < split:
+            trSet.append(dataset[x])
+        else:
+            teSet.append(dataset[x])    
+
+
+def distance(instance1 , instance2 , k ):
+    distance =0 
+    mm1 = instance1[0] 
+    cm1 = instance1[1]
+    mm2 = instance2[0]
+    cm2 = instance2[1]
+    distance = np.trace(np.dot(np.linalg.inv(cm2), cm1)) 
+    distance+=(np.dot(np.dot((mm2-mm1).transpose() , np.linalg.inv(cm2)) , mm2-mm1 )) 
+    distance+= np.log(np.linalg.det(cm2)) - np.log(np.linalg.det(cm1))
+    distance-= k
+    return distance
+
 directory = "C:\\Users\\mamlo\\Downloads\\E-learning3GLID\\Docker\\Projet\\MachineLearning\\Data\\"
 f = open("my.dat", 'wb')
-
-
 
 i = 0
 
@@ -72,45 +97,23 @@ f.close()
 
 dataset = []
 
-def loadDataset(filename, split, trSet, teSet):
-    with open('my.dat', 'rb') as f:
-        while True:
-            try:
-                dataset.append(pickle.load(f))
-            except EOFError:
-                f.close()
-                break
-    for x in range(len(dataset)):
-        if random.random() < split:
-            trSet.append(dataset[x])
-        else:
-            teSet.append(dataset[x])
+
 trainingSet = []
 testSet = []
 loadDataset('my.dat', 0.66, trainingSet, testSet)
 
-def distance(instance1 , instance2 , k ):
-    distance =0 
-    mm1 = instance1[0] 
-    cm1 = instance1[1]
-    mm2 = instance2[0]
-    cm2 = instance2[1]
-    distance = np.trace(np.dot(np.linalg.inv(cm2), cm1)) 
-    distance+=(np.dot(np.dot((mm2-mm1).transpose() , np.linalg.inv(cm2)) , mm2-mm1 )) 
-    distance+= np.log(np.linalg.det(cm2)) - np.log(np.linalg.det(cm1))
-    distance-= k
-    return distance
+
 
 leng = len(testSet)
 predictions = []
 for x in range(leng):
-    predictions.append(nearestClass(getNeighbors(trainingSet, testSet[x], 1)))
+    predictions.append(nearestClass(getNeighbors(trainingSet, testSet[x], 5)))
 
 accuracy1 = getAccuracy(testSet, predictions)
-print(accuracy1)
+#print(accuracy1)
 
 test_dir = "C:\\Users\\mamlo\\Downloads\\E-learning3GLID\\Docker\\Projet\\MachineLearning\\Test\\"
-test_file = test_dir + "test3.wav"
+test_file = test_dir + "test6.wav"
 #test_file = test_dir + "test2.wav"
 # test_file = test_dir + "test4.wav"
 
@@ -129,7 +132,7 @@ i = 1
 for folder in os.listdir(directory):
     results[i] = folder
     i += 1
-print(results)
+#print(results)
 
-pred = nearestClass(getNeighbors(dataset, feature, 1))
+pred = nearestClass(getNeighbors(dataset, feature, 5))
 print(results[pred])
